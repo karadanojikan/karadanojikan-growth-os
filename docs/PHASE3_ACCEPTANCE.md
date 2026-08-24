@@ -65,7 +65,10 @@ Configured in Meta for Developers on 2026-08-24 with explicit human approval:
 - Webhook callback verification succeeded for `https://karadanojikan-growth-os-jet.vercel.app/api/instagram/webhook` with API version `v26.0`
 - Meta reports `comments`, `live_comments`, and `message_edit` webhook fields as subscribed
 - The app secret was transferred directly into a Vercel Sensitive Production variable and was not exposed in chat, logs, source, or documentation
-- No access token, customer data, comment, DM, or media was exposed or mutated
+- Official Instagram OAuth completed for owned account `@karadanojikan`; the runtime reports account type `MEDIA_CREATOR` and token expiry `2026-10-24`
+- The returned access token is stored encrypted server-side and was not printed, pasted into chat, or exposed to the browser UI
+- Runtime Capability Matrix evidence enables Post, Reels, Carousel, Insights, and Comments; Stories, Messages, and Webhooks remain OFF because the required runtime evidence is incomplete
+- No customer data, comment, DM, media, purchase, subscription, paid-plan change, or Instagram publication was exposed or mutated
 
 ## Production deployment evidence
 
@@ -86,8 +89,7 @@ Deployed to the `karadanojikan` Vercel team on 2026-08-25 from GitHub commit `90
 
 Phase 3 cannot be marked complete until all of the following are explicitly approved and performed:
 
-1. Sign in to the production app and run the Instagram OAuth connection against the owned tester account.
-2. Verify the returned professional-account type, exact granted permissions, token expiry, and resulting Capability Matrix without performing a publication.
-3. Run the remaining sandbox/test-account E2E: media ingestion, exact-version human approval, schedule, status, insight fetch, and forced-failure handling. A real publish still requires a separate explicit approval.
+1. Investigate the missing runtime evidence for Stories, Messages, and Webhooks without broadening permissions or enabling automation.
+2. Run the remaining sandbox/test-account E2E: media ingestion, exact-version human approval, schedule, status, insight fetch, and forced-failure handling. A real publish still requires a separate explicit approval.
 
-No OAuth access token, real insight retrieval, comment action, DM action, or Instagram publication occurred in this acceptance yet.
+No real insight retrieval, comment action, DM action, purchase, subscription, paid-plan change, or Instagram publication occurred in this acceptance yet. `AUTO_PUBLISH=false` remains mandatory.
