@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "assetId": "roundtrip-fixture",
+  "style": "EDUCATIONAL",
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "clips": [
+    {
+      "id": "clip-1",
+      "assetId": "roundtrip-fixture",
+      "sourceStart": 0,
+      "sourceEnd": 4,
+      "timelineStart": 0,
+      "crop": "FILL",
+      "zoom": 1,
+      "volume": 1,
+      "playbackRate": 1,
+      "transition": "NONE"
+    }
+  ],
+  "subtitles": [
+    {
+      "id": "caption-1",
+      "startSeconds": 0.2,
+      "endSeconds": 2,
+      "lines": ["元素材から", "非破壊で再編集"],
+      "emphasis": [],
+      "safeArea": "REELS_9_16_BOTTOM"
+    },
+    {
+      "id": "caption-2",
+      "startSeconds": 2,
+      "endSeconds": 3.8,
+      "lines": ["v1 EDLを保持します"],
+      "emphasis": [],
+      "safeArea": "REELS_9_16_BOTTOM"
+    }
+  ],
+  "editCandidates": [],
+  "audio": {
+    "normalizeVoice": true,
+    "reduceNoise": false,
+    "fadeInSeconds": 0.12,
+    "fadeOutSeconds": 0.2,
+    "duckMusicUnderVoice": true,
+    "musicSource": "NONE",
+    "musicLicenseReference": null
+  },
+  "hook": "元動画は、そのまま。",
+  "coverText": "非破壊編集",
+  "createdAt": "2026-08-24T00:00:00.000Z",
+  "sourceImmutable": true
+}

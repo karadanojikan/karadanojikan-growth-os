@@ -1,0 +1,14 @@
+/.git
+/.vercel
+/.env*
+/.next
+/node_modules
+/coverage
+/docs
+/fixtures
+/scripts
+/supabase
+**/*.test.ts
+*.log
+*.tsbuildinfo
+.DS_Store

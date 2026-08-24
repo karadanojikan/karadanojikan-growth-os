@@ -1,0 +1,7 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { InstagramPublishReview } from "@/components/instagram-publish-review";
+import { getInstagramPublishReview } from "@/lib/instagram-publish-data";
+
+function localDateTime(value:string|null){const date=value?new Date(value):new Date(Date.now()+60*60*1000);const parts=new Intl.DateTimeFormat("sv-SE",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Asia/Tokyo"}).format(date);return parts.replace(" ","T");}
+export default async function PublishReviewPage({params}:{params:Promise<{id:string}>}){const data=await getInstagramPublishReview((await params).id);if(!data?.version)notFound();const payload=data.version.payload as Record<string,unknown>;return <div className="page"><header><p className="eyebrow">HUMAN APPROVAL</p><h1 className="title">投稿前の最終確認</h1><p className="lead mt-3">{data.content.topic}。承認した版だけを予定キューへ入れます。</p></header><div className="mt-6"><InstagramPublishReview contentItemId={data.content.id} contentVersionId={data.version.id} contentType={data.content.content_type} caption={typeof payload.caption==="string"?payload.caption:""} assets={data.assets} defaultScheduledFor={localDateTime(data.content.scheduled_for)} connected={data.account?.connection_status==="CONNECTED"} publishing={Boolean(data.capabilities?.publishing)}/></div><Link href="/operate" className="secondary mt-5 no-underline">運用に戻る</Link></div>}

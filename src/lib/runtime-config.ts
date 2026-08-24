@@ -16,6 +16,10 @@ export function getAppMode(): AppMode {
   return AppModeSchema.catch("demo").parse(process.env.NEXT_PUBLIC_APP_MODE);
 }
 
+export function isAutoPublishEnabled() {
+  return process.env.AUTO_PUBLISH === "true";
+}
+
 export function getSupabasePublicConfig() {
   const parsed = SupabasePublicConfigSchema.safeParse({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL,

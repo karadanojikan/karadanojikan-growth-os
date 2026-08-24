@@ -3,6 +3,7 @@ import { z } from "zod";
 export const ObjectiveSchema = z.enum(["GROWTH", "TRUST", "LIFESTYLE", "CONVERSION"]);
 export const ConfidenceSchema = z.enum(["LOW", "MEDIUM", "HIGH"]);
 export const SafetyStatusSchema = z.enum(["PASS", "REVIEW", "BLOCK"]);
+export const ContentTypeSchema = z.enum(["REELS", "CAROUSEL"]);
 
 export const ShotSchema = z.object({
   id: z.string(),
@@ -22,6 +23,7 @@ export const SceneSchema = z.object({
 }).refine((v) => v.endSeconds > v.startSeconds, "Scene end must follow start");
 
 export const ReelsPlanSchema = z.object({
+  contentType: z.literal("REELS").default("REELS"),
   id: z.string(),
   version: z.number().int().positive(),
   objective: ObjectiveSchema,
@@ -40,6 +42,68 @@ export const ReelsPlanSchema = z.object({
   sourceFactIds: z.array(z.string()),
 });
 export type ReelsPlan = z.infer<typeof ReelsPlanSchema>;
+
+export const CarouselSlideSchema = z.object({
+  id: z.string(),
+  position: z.number().int().positive().max(12),
+  heading: z.string().min(1).max(42),
+  body: z.string().min(1).max(180),
+  visualDirection: z.string().min(1).max(120),
+});
+
+export const CarouselPlanSchema = z.object({
+  contentType: z.literal("CAROUSEL"),
+  id: z.string(),
+  version: z.number().int().positive(),
+  objective: ObjectiveSchema,
+  topic: z.string().min(1),
+  hook: z.string().min(1).max(42),
+  slides: z.array(CarouselSlideSchema).min(3).max(12),
+  thumbnailOptions: z.array(z.string().max(24)).min(1).max(4),
+  caption: z.string().min(1).max(2200),
+  cta: z.string().min(1).max(120),
+  safetyStatus: SafetyStatusSchema,
+  safetyFlags: z.array(z.string()),
+  brandScore: z.number().min(0).max(100),
+  confidence: ConfidenceSchema,
+  sourceFactIds: z.array(z.string()),
+});
+export type CarouselPlan = z.infer<typeof CarouselPlanSchema>;
+
+export const ContentPlanSchema = z.discriminatedUnion("contentType", [ReelsPlanSchema, CarouselPlanSchema]);
+export type ContentPlan = z.infer<typeof ContentPlanSchema>;
+
+export const BrandBrainSchema = z.object({
+  concept: z.string().min(1).max(500),
+  audience: z.string().min(1).max(300),
+  tone: z.array(z.string().min(1).max(40)).min(1).max(12),
+  services: z.array(z.string().min(1).max(120)).max(20),
+  location: z.string().max(160),
+  reservationFlow: z.string().max(500),
+  approvedClaims: z.array(z.string().min(1).max(300)).max(30),
+  forbiddenClaims: z.array(z.string().min(1).max(200)).min(1).max(30),
+  terminology: z.record(z.string(), z.string()),
+  colors: z.array(z.string().min(1).max(40)).max(12),
+  fonts: z.array(z.string().min(1).max(80)).max(12),
+  ctaStyle: z.string().max(300),
+  postingRatios: z.object({
+    GROWTH: z.number().min(0).max(1),
+    TRUST: z.number().min(0).max(1),
+    LIFESTYLE: z.number().min(0).max(1),
+    CONVERSION: z.number().min(0).max(1),
+  }).refine((value) => Math.abs(Object.values(value).reduce((sum, ratio) => sum + ratio, 0) - 1) < 0.001, "Posting ratios must total 1"),
+  contentThemes: z.array(z.string().min(1).max(80)).min(1).max(30),
+  unknownFacts: z.array(z.string().min(1).max(120)).max(30),
+  version: z.number().int().positive(),
+});
+export type BrandBrain = z.infer<typeof BrandBrainSchema>;
+
+export const SafetyResultSchema = z.object({
+  status: SafetyStatusSchema,
+  flags: z.array(z.string()),
+  checkedAt: z.string().datetime(),
+});
+export type SafetyResult = z.infer<typeof SafetyResultSchema>;
 
 export const InstagramCapabilitiesSchema = z.object({
   publishing: z.boolean(), reels: z.boolean(), carousel: z.boolean(), stories: z.boolean(),

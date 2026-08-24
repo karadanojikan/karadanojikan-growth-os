@@ -8,7 +8,7 @@ export const todayRecommendation = {
 };
 
 export const demoPlan: ReelsPlan = ReelsPlanSchema.parse({
-  id: "demo-reel-shoulder-001", version: 1, objective: "GROWTH", topic: "首・肩セルフケア",
+  contentType: "REELS", id: "demo-reel-shoulder-001", version: 1, objective: "GROWTH", topic: "首・肩セルフケア",
   hook: "肩だけ揉んでない？", targetDurationSeconds: 25,
   scenes: [
     { id: "s1", startSeconds: 0, endSeconds: 3, visual: "正面、肩に手を置いてカメラを見る", overlay: "肩だけ揉んでない？" },

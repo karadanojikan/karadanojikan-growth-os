@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.9.0"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -12,15 +12,23 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "video:worker": "node scripts/video-worker.mjs",
+    "video:fixture": "node scripts/video-worker.mjs --fixture --output /private/tmp/karadanojikan-phase2-fixture.mp4",
+    "video:transcription:setup": "node scripts/setup-whisper.mjs"
   },
   "dependencies": {
+    "@remotion/bundler": "4.0.516",
+    "@remotion/install-whisper-cpp": "4.0.516",
+    "@remotion/player": "4.0.516",
+    "@remotion/renderer": "4.0.516",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "next": "^16.3.0",
     "openai": "^5.20.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "remotion": "4.0.516",
     "zod": "^3.25.76"
   },
   "devDependencies": {

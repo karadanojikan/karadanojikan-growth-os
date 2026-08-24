@@ -6,6 +6,8 @@ Upload original → checksum/virus boundary → ffprobe → transcription → si
 
 The original is immutable. Every trim/reorder/template change creates a new EDL version referencing source timecodes.
 
+The current local worker records SHA-256 and decoding integrity. Malware scanning is not configured and is reported as `NOT_CONFIGURED_REVIEW_REQUIRED`; it is a production gate, not a simulated pass.
+
 ## EDL
 
 Each clip stores asset ID, source start/end, timeline start, crop/zoom, volume, captions, overlays, and transitions. Validation rejects negative times, source overflow, timeline overlaps where prohibited, missing rights, and subtitle safe-area overflow.
@@ -21,6 +23,8 @@ Benchmark one representative 30s 1080×1920 Reel across current Remotion Lambda,
 ## QC
 
 Verify 9:16 resolution, duration, codec/container, audio stream/loudness, subtitle bounds, black frames, clipping, and file size. Meta publishing compatibility is revalidated immediately before Phase 3.
+
+Local QC uses output metadata, EBU loudness true peak, subtitle contracts, and five-point grayscale frame sampling. Results store actual values and remain `REVIEW` whenever a check is unavailable.
 
 ## Rights
 

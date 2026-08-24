@@ -37,8 +37,10 @@ button { font: inherit; }
 .lead { max-width: 42rem; color: var(--muted); line-height: 1.8; }
 .card { background: rgba(255,255,255,.9); border: 1px solid var(--line); border-radius: 1.5rem; box-shadow: var(--shadow); }
 .soft-card { background: var(--sage-soft); border: 1px solid rgba(113,128,109,.12); border-radius: 1.25rem; }
+.alert-card { background: #fff1ef; border: 1px solid rgba(165,80,76,.28); border-radius: 1.25rem; color: #713c39; }
 .primary { display: inline-flex; min-height: 3.55rem; align-items: center; justify-content: center; gap: .55rem; border: 0; border-radius: 999px; background: var(--sage-dark); color: white; padding: .8rem 1.25rem; font-weight: 800; cursor: pointer; box-shadow: 0 10px 24px rgba(82,96,79,.2); transition: transform .18s, background .18s; }
 .primary:hover { background: #455242; transform: translateY(-1px); }
+.primary:disabled, .secondary:disabled { cursor: not-allowed; opacity: .48; transform: none; }
 .secondary { display: inline-flex; min-height: 3rem; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 999px; background: white; padding: .7rem 1rem; font-weight: 750; cursor: pointer; }
 .pill { display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px; padding: .35rem .65rem; background: var(--sage-soft); color: var(--sage-dark); font-size: .76rem; font-weight: 800; }
 .metric { font-size: 1.55rem; line-height: 1; font-weight: 800; letter-spacing: -.04em; }

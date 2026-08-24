@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { SaveContentDraftSchema } from "@/lib/content-draft";
+import { applyBrandGuardian } from "@/lib/brand-guardian";
 import { getAppMode, isSupabaseConfigured } from "@/lib/runtime-config";
 import { createClient } from "@/lib/supabase/server";
+import { getBrandBrainForWorkspace } from "@/lib/phase1-data";
 
 export async function POST(request: Request) {
   if (getAppMode() !== "real" || !isSupabaseConfigured()) {
@@ -24,18 +26,33 @@ export async function POST(request: Request) {
     .maybeSingle();
   if (membershipError || !membership) return NextResponse.json({ error: "Workspace membership required." }, { status: 403 });
 
-  const { data, error } = await supabase.rpc("save_content_draft", {
+  const brand = await getBrandBrainForWorkspace(supabase, membership.workspace_id);
+  const guardedPlan = applyBrandGuardian(input.data.plan, brand);
+  if (guardedPlan.safetyStatus === "BLOCK") return NextResponse.json({ error: "安全確認でBLOCKの投稿は保存できません。", flags: guardedPlan.safetyFlags }, { status: 422 });
+
+  const versions = (input.data.versions ?? [guardedPlan]).map((version) => applyBrandGuardian(version, brand));
+  let { data, error } = await supabase.rpc("save_content_draft_versions", {
     p_workspace_id: membership.workspace_id,
-    p_content_type: "REELS",
-    p_objective: input.data.plan.objective,
-    p_topic: input.data.plan.topic,
-    p_payload: input.data.plan,
+    p_content_type: guardedPlan.contentType,
+    p_objective: guardedPlan.objective,
+    p_topic: guardedPlan.topic,
+    p_versions: versions,
     p_scheduled_for: input.data.scheduledFor,
   });
+  if (error?.code === "PGRST202" || error?.code === "42883") {
+    ({ data, error } = await supabase.rpc("save_content_draft", {
+      p_workspace_id: membership.workspace_id,
+      p_content_type: guardedPlan.contentType,
+      p_objective: guardedPlan.objective,
+      p_topic: guardedPlan.topic,
+      p_payload: { ...guardedPlan, versionHistory: versions },
+      p_scheduled_for: input.data.scheduledFor,
+    }));
+  }
   if (error || typeof data !== "string") {
     console.error("content_draft_save_failed", { code: error?.code, requestId: request.headers.get("x-request-id") });
     return NextResponse.json({ error: "Draft could not be saved." }, { status: 500 });
   }
 
-  return NextResponse.json({ contentId: data, version: 1, mode: "real" }, { status: 201 });
+  return NextResponse.json({ contentId: data, version: guardedPlan.version, mode: "real" }, { status: 201 });
 }

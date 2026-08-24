@@ -20,4 +20,29 @@ Validate signature before parsing business data; persist provider event ID; dedu
 
 ## Documentation gate
 
-Before Phase 3 implementation, record the current official API version, login path, review requirements, permissions, publishing limits, container status polling, supported media constraints, insight metrics/retention, messaging window/rules, webhook fields, and rate limits. If official docs do not confirm a capability, its default is false.
+Verified against Meta's official documentation on 2026-08-24 (Asia/Tokyo):
+
+- API examples use `v26.0`; the app keeps `META_API_VERSION` configurable and records the verified version per account.
+- Instagram Login uses `https://www.instagram.com/oauth/authorize`, exchanges the code server-side, then exchanges the one-hour short token for a 60-day long token. A valid long token older than 24 hours can be refreshed for another 60 days.
+- Current scopes are `instagram_business_basic`, `instagram_business_content_publish`, `instagram_business_manage_comments`, `instagram_business_manage_insights`, and `instagram_business_manage_messages`. The older `business_*` scope names are not used.
+- Standard Access is sufficient for a professional account owned/managed by the app owner and added in the App Dashboard. Other accounts require Advanced Access/app review.
+- Publishing creates a container, polls `status_code`, and only calls `media_publish` after `FINISHED`. Supported states are `EXPIRED`, `ERROR`, `FINISHED`, `IN_PROGRESS`, and `PUBLISHED`.
+- The documented API publishing limit is 100 posts per rolling 24 hours per professional account; a carousel counts as one. The runtime also checks `content_publishing_limit`.
+- Publishing media must be reachable by Meta at ingestion time. The worker creates one-hour signed URLs from private Storage; it never makes originals permanently public.
+- Webhook verification happens on the raw request body before JSON parsing. Payloads are encrypted, service-only, deduplicated by SHA-256, and treated as untrusted input.
+- Comments and insights are read only when the corresponding runtime capability is true. Comment replies remain human-approved Phase 5 work.
+
+Official sources:
+
+- [Instagram API with Instagram Login](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-instagram-login)
+- [Business Login and token lifecycle](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-instagram-login/business-login)
+- [Content publishing](https://developers.facebook.com/documentation/instagram-platform/content-publishing)
+- [Webhooks](https://developers.facebook.com/documentation/instagram-platform/webhooks)
+- [Media insights](https://developers.facebook.com/documentation/instagram-platform/reference/instagram-media/insights)
+- [Comment moderation](https://developers.facebook.com/documentation/instagram-platform/comment-moderation)
+
+If official docs or a runtime check do not confirm a capability, its default is false.
+
+## Activation boundary
+
+The code, schema, and disabled UI are present. Activation still requires a user-approved Meta Business app, exact OAuth redirect URI, public HTTPS webhook, server-only secrets, Phase 3 Supabase migration, and a test professional account. No app was created and no Instagram account or post was changed during implementation.

@@ -8,7 +8,7 @@ Build a dedicated operating system for the “からだのじかん” Instagram
 
 ## Current scope
 
-The repository began empty. This baseline delivers documentation-first architecture plus a Phase 0/1 Demo Mode. Real Supabase, OpenAI, Meta, and rendering credentials are intentionally not required for the demo and are never simulated as production.
+Phase 0, Phase 1, and the Phase 2 local/Real persistence slice are complete. Phase 3's official-API code and security boundaries are implemented locally: OAuth, encrypted tokens, runtime capabilities, exact-version approval, scheduled jobs, container polling, Insights, Webhooks, and recovery. Supabase activation and a user-approved Meta test-account E2E remain before Phase 3 completion.
 
 ## Milestones
 
@@ -32,11 +32,21 @@ Exit gate: lint, typecheck, unit tests, production build, secret scan, mobile re
 
 Exit gate: the ten-step mobile Definition of Done works without Instagram or OpenAI.
 
+Status: complete on 2026-08-24. Evidence is recorded in `docs/PHASE1_ACCEPTANCE.md`; the Supabase migration preserves every generated plan version and rejects BLOCK content.
+
 ### Phase 2 — Video Studio
 
 Upload → probe → transcription → silence candidates → versioned EDL → Remotion preview/render → QC. Rendering is an asynchronous provider-backed job, never a web request.
 
-### Phases 3–6
+Status: complete for the local MVP on 2026-08-24. Evidence is in `docs/PHASE2_ACCEPTANCE.md`. Supabase Storage/RLS and the Real Mode save/queue path are verified; production-provider selection remains an explicit deployment gate.
+
+### Phase 3 — Instagram
+
+Official Instagram Login → capability/permission verification → media rights → exact-version human approval → schedule → asynchronous container/publish → actual Insights → failure/reconnect recovery.
+
+Status: local implementation complete on 2026-08-24. Evidence is in `docs/PHASE3_ACCEPTANCE.md`. External activation is intentionally pending explicit approval for the Meta app, public callback/webhook, Supabase migration, and test-account publication.
+
+### Phases 4–6
 
 Official Instagram connection and capabilities; growth intelligence; community/leads; PWA, accessibility, recovery, performance, and security audit.
 
@@ -46,7 +56,7 @@ Official Instagram connection and capabilities; growth intelligence; community/l
 2. Build Phase 0 and its verification gates.
 3. Build Phase 1 vertical slice and E2E journey.
 4. Connect real services one at a time behind adapters.
-5. Start video work only after Phase 1 gates pass.
+5. Benchmark production render providers before choosing one; keep the disabled provider boundary until approved.
 
 ## Risks and mitigations
 
@@ -63,4 +73,4 @@ Official Instagram connection and capabilities; growth intelligence; community/l
 
 ## Validation environment
 
-The machine has no system Node.js/npm and no Apple Command Line Tools. Validation was completed with an official Node.js 24.19.0 LTS binary isolated in `/private/tmp`; project dependencies and lockfile are present. A normal developer setup still needs Node.js 20.9+ (24 LTS recommended). Git operations remain unavailable until Apple Command Line Tools are installed.
+Apple Command Line Tools, Git, and Node.js are installed. Phase 2 passed its real local/Supabase evidence. Phase 3 currently passes strict contracts for official OAuth, token encryption, capability fail-closed behavior, version approval, publish states, Meta container behavior, and webhook signatures; external sandbox evidence is still pending. The first repository commit is tracked on GitHub.
