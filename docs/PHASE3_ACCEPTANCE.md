@@ -1,6 +1,6 @@
 # Phase 3 acceptance evidence
 
-Verified locally: 2026-08-24, Asia/Tokyo
+Verified locally and in production: 2026-08-25, Asia/Tokyo
 
 ## Implemented foundation
 
@@ -46,8 +46,8 @@ Applied to project `xfghlzfokaspbldgmkiq` on 2026-08-24 with explicit human appr
 - Direct `authenticated` INSERT on `instagram_accounts`: denied
 - Direct `authenticated` INSERT on `approvals`: denied
 - `/settings/instagram` in REAL mode: loads safely as `DISCONNECTED`; every capability remains OFF while Meta configuration is absent
-- Supabase Auth Site URL: `https://karadanojikan-growth-os.vercel.app`
-- Allowed Auth redirects: production and localhost `/auth/callback` URLs
+- Supabase Auth Site URL: `https://karadanojikan-growth-os-jet.vercel.app`
+- Allowed Auth redirects include the current production and localhost `/auth/callback` URLs; the prior production callback remains temporarily allowlisted for rollback
 
 ## Meta external evidence
 
@@ -61,29 +61,33 @@ Configured in Meta for Developers on 2026-08-24 with explicit human approval:
 - `instagram_business_manage_insights`: test ready
 - `instagram_business_manage_messages`: test ready; runtime DM actions remain OFF
 - Owned professional account `karadanojikan`: Instagram tester invite accepted and account added to the API setup
-- Instagram Business Login redirect: `https://karadanojikan-growth-os.vercel.app/api/instagram/callback`
-- No app secret, access token, customer data, comment, DM, or media was exposed or mutated
+- Instagram Business Login allowed redirect includes `https://karadanojikan-growth-os-jet.vercel.app/api/instagram/callback`; the prior production callback remains temporarily allowlisted for rollback
+- Webhook callback verification succeeded for `https://karadanojikan-growth-os-jet.vercel.app/api/instagram/webhook` with API version `v26.0`
+- Meta reports `comments`, `live_comments`, and `message_edit` webhook fields as subscribed
+- The app secret was transferred directly into a Vercel Sensitive Production variable and was not exposed in chat, logs, source, or documentation
+- No access token, customer data, comment, DM, or media was exposed or mutated
 
 ## Production deployment evidence
 
-Deployed to Vercel on 2026-08-24:
+Deployed to the `karadanojikan` Vercel team on 2026-08-25 from GitHub commit `902147b`:
 
-- Stable HTTPS URL: `https://karadanojikan-growth-os.vercel.app`
+- Stable HTTPS URL: `https://karadanojikan-growth-os-jet.vercel.app`
 - Functions execute in Tokyo (`hnd1`)
 - Unauthenticated root requests redirect to `/login`; the login page returns `200`
-- Unconfigured webhook verification fails closed with `503`
+- Configured webhook requests without a valid verification challenge fail closed with `403`; Meta callback verification succeeded
 - Unauthenticated publish-worker requests fail with `401`
 - `AUTO_PUBLISH=false`; the worker also rejects validly authenticated execution while publishing is disabled
 - CSP, HSTS, frame denial, MIME sniffing protection, referrer policy, permissions policy, and cross-origin opener policy are enabled
 - Source maps, local environment files, docs, fixtures, scripts, tests, migrations, and Git metadata are excluded from the deployment upload
-- Server-generated encryption, webhook verification, and cron secrets are stored as Vercel Sensitive Production variables and were not printed
+- Supabase server key, Meta app secret, encryption key, webhook verification token, redirect URI, and cron secret are stored as Vercel Sensitive Production-only variables and were not printed
+- The previous Vercel-team deployment remains available only as a rollback target and has not been deleted
 
 ## External acceptance still required
 
 Phase 3 cannot be marked complete until all of the following are explicitly approved and performed:
 
-1. Transfer the existing Supabase service-role key and Meta Instagram app secret directly into Vercel Sensitive Production variables; never paste them into chat.
-2. Redeploy so the final server-only variables are active, then register and verify the webhook callback.
-3. Run a sandbox/test-account E2E: connect, permission check, media ingestion, exact-version human approval, schedule, status, insight fetch, and forced-failure handling. A real publish still requires a separate explicit approval.
+1. Sign in to the production app and run the Instagram OAuth connection against the owned tester account.
+2. Verify the returned professional-account type, exact granted permissions, token expiry, and resulting Capability Matrix without performing a publication.
+3. Run the remaining sandbox/test-account E2E: media ingestion, exact-version human approval, schedule, status, insight fetch, and forced-failure handling. A real publish still requires a separate explicit approval.
 
-No OAuth connection, webhook subscription, real insight retrieval, comment action, DM action, or Instagram publication occurred in this acceptance yet.
+No OAuth access token, real insight retrieval, comment action, DM action, or Instagram publication occurred in this acceptance yet.
