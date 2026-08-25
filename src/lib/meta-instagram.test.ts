@@ -53,7 +53,7 @@ describe("Meta official Instagram client", () => {
     let method: string | undefined;
     const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       method = init?.method;
-      return json({ id: "ig-1", followers_count: 125, follows_count: 40, media_count: 22 });
+      return json({ data: [{ user_id: "ig-1", followers_count: 125, follows_count: 40, media_count: 22 }] });
     }) as unknown as typeof fetch;
     const result = await new MetaInstagramClient("secret-token", "v26.0", fetcher).getAccountSnapshot("ig-1");
     expect(method).toBeUndefined();

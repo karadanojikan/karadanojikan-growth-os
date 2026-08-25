@@ -1,4 +1,5 @@
 import "server-only";
+import { z } from "zod";
 import { requireInstagramConfig } from "./instagram-config";
 import { decryptSecret } from "./instagram-crypto";
 import { buildPeriodReview, measurementWindowFor, normalizeMetaInsightData, type DirectMetrics, type MeasuredPost } from "./growth-intelligence";
@@ -45,7 +46,7 @@ export async function syncInstagramInsights(input: SyncInput) {
     if (new Date(input.account.token_expires_at) <= now) throw new InsightSyncError("RECONNECT_REQUIRED", "Instagramの再接続が必要です。");
     const config = requireInstagramConfig();
     const client = new MetaInstagramClient(decryptSecret(input.account.token_ciphertext, config.encryptionKey), config.apiVersion);
-    const page = await client.getOwnedMedia({ accountId: input.account.external_account_id, limit: MAX_MEDIA_DISCOVERY });
+    const page = await client.getOwnedMedia({ limit: MAX_MEDIA_DISCOVERY });
     apiCalls += 1;
     const ownedMedia = page.data.filter((item) => item.timestamp && item.id).slice(0, MAX_MEDIA_DISCOVERY);
     const externalIds = ownedMedia.map((item) => item.id);
@@ -120,7 +121,7 @@ export async function syncInstagramInsights(input: SyncInput) {
     }
 
     if (!rateLimited) try {
-      const snapshot = await client.getAccountSnapshot(input.account.external_account_id); apiCalls += 1;
+      const snapshot = await client.getAccountSnapshot(); apiCalls += 1;
       await admin.from("account_insights").insert({
         workspace_id: input.workspaceId, instagram_account_id: input.account.id,
         metrics: { followers_count: snapshot.followers_count ?? null, follows_count: snapshot.follows_count ?? null, media_count: snapshot.media_count ?? null, attribution: "ACCOUNT_LEVEL" },
@@ -146,10 +147,11 @@ export async function syncInstagramInsights(input: SyncInput) {
   } catch (error) {
     const reconnect = error instanceof InsightSyncError && error.code === "RECONNECT_REQUIRED" || error instanceof MetaApiError && (error.status === 401 || error.status === 403 || error.code === 190);
     const limited = error instanceof MetaApiError && error.status === 429;
-    await admin.from("instagram_insight_sync_runs").update({ status: "FAILED", media_measured: mediaMeasured, api_calls: apiCalls, unavailable_metrics: unavailableCount, error_code: reconnect ? "RECONNECT_REQUIRED" : limited ? "META_RATE_LIMIT" : "SYNC_FAILED", completed_at: new Date().toISOString() }).eq("id", run.id);
+    const errorCode = reconnect ? "RECONNECT_REQUIRED" : limited ? "META_RATE_LIMIT" : error instanceof MetaApiError ? `META_${error.status}_${error.code ?? "UNKNOWN"}` : error instanceof z.ZodError ? "META_RESPONSE_INVALID" : "SYNC_FAILED";
+    await admin.from("instagram_insight_sync_runs").update({ status: "FAILED", media_measured: mediaMeasured, api_calls: apiCalls, unavailable_metrics: unavailableCount, error_code: errorCode, completed_at: new Date().toISOString() }).eq("id", run.id);
     if (reconnect) throw new InsightSyncError("RECONNECT_REQUIRED", "Instagramの再接続が必要です。");
     if (limited) throw new InsightSyncError("RATE_LIMITED", "Meta APIの利用上限に達しました。時間をおいて再実行してください。");
     if (error instanceof InsightSyncError) throw error;
-    throw new InsightSyncError("FAILED", "Instagram実測値を取得できませんでした。");
+    throw new InsightSyncError("FAILED", `Instagram実測値を取得できませんでした。(${errorCode})`);
   }
 }

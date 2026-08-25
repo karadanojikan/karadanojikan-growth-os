@@ -29,11 +29,16 @@ const OwnedMediaPageSchema = z.object({
   paging: z.object({ cursors: z.object({ before: z.string().optional(), after: z.string().optional() }).optional() }).optional(),
 });
 const AccountSnapshotSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(String),
+  id: z.union([z.string(), z.number()]).transform(String).optional(),
+  user_id: z.union([z.string(), z.number()]).transform(String).optional(),
   followers_count: z.number().int().nonnegative().optional(),
   follows_count: z.number().int().nonnegative().optional(),
   media_count: z.number().int().nonnegative().optional(),
-});
+}).refine((value) => Boolean(value.id || value.user_id), "Instagram account identifier is required");
+const AccountSnapshotResponseSchema = z.union([
+  AccountSnapshotSchema,
+  z.object({ data: z.array(AccountSnapshotSchema).min(1) }),
+]).transform((value) => "data" in value ? value.data[0]! : value);
 
 export class MetaApiError extends Error {
   constructor(readonly status: number, readonly code: number | undefined, message: string, readonly requestId?: string) {
@@ -134,7 +139,7 @@ export class MetaInstagramClient {
   }
 
   async getAccountSnapshot(accountId = "me") {
-    return AccountSnapshotSchema.parse(await this.request(`/${encodeURIComponent(accountId)}?fields=id,followers_count,follows_count,media_count`));
+    return AccountSnapshotResponseSchema.parse(await this.request(`/${encodeURIComponent(accountId)}?fields=user_id,followers_count,follows_count,media_count`));
   }
 
   async getMediaDetails(mediaId: string) {
