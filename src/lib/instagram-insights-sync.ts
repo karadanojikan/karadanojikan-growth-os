@@ -35,7 +35,10 @@ export async function syncInstagramInsights(input: SyncInput) {
   const { data: run, error: runError } = await admin.from("instagram_insight_sync_runs").insert({
     workspace_id: input.workspaceId, instagram_account_id: input.account.id, requested_by: input.userId, status: "RUNNING",
   }).select("id").single();
-  if (runError || !run) throw new InsightSyncError("FAILED", "同期記録を開始できませんでした。");
+  if (runError || !run) {
+    console.error("instagram_insight_sync_start_failed", { code: runError?.code ?? "NO_ROW", message: runError?.message ?? "Insert returned no row", details: runError?.details ?? null, hint: runError?.hint ?? null });
+    throw new InsightSyncError("FAILED", `同期記録を開始できませんでした。(${runError?.code ?? "NO_ROW"})`);
+  }
 
   let apiCalls = 0; let mediaMeasured = 0; let unavailableCount = 0; let rateLimited = false;
   try {

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const sql = readFileSync(new URL("../../supabase/migrations/202608250001_phase4_growth_intelligence.sql", import.meta.url), "utf8");
 const serviceGrantSql = readFileSync(new URL("../../supabase/migrations/202608250002_phase4_service_role_grants.sql", import.meta.url), "utf8");
+const trustedServerSql = readFileSync(new URL("../../supabase/migrations/202608250003_trusted_server_grants.sql", import.meta.url), "utf8");
 
 describe("Phase 4 growth intelligence migration", () => {
   it("enables RLS and grants browser clients read-only access", () => {
@@ -13,6 +14,10 @@ describe("Phase 4 growth intelligence migration", () => {
     expect(sql).not.toContain("grant insert on table public.%I to authenticated");
     expect(sql).toContain("grant select,insert,update,delete on table public.%I to service_role");
     expect(serviceGrantSql).toContain("grant select,insert,update,delete on table public.%I to service_role");
+    expect(trustedServerSql).toContain("public.published_posts");
+    expect(trustedServerSql).toContain("public.account_insights");
+    expect(trustedServerSql).toContain("to service_role");
+    expect(trustedServerSql).not.toContain("to authenticated");
   });
   it("keeps recommendations and experiments human-governed", () => {
     expect(sql).toContain("status in ('PROPOSED','APPROVED','RUNNING','COMPLETED','REJECTED','ARCHIVED')");
