@@ -109,6 +109,7 @@ begin
   ] loop
     execute format('alter table public.%I enable row level security', table_name);
     execute format('revoke all on table public.%I from anon, authenticated', table_name);
+    execute format('grant select,insert,update,delete on table public.%I to service_role', table_name);
     execute format('grant select on table public.%I to authenticated', table_name);
     execute format('create policy %I on public.%I for select to authenticated using (public.is_workspace_member(workspace_id))', table_name || '_select', table_name);
   end loop;
