@@ -32,6 +32,19 @@ Verified against Meta's official documentation on 2026-08-24 (Asia/Tokyo):
 - Webhook verification happens on the raw request body before JSON parsing. Payloads are encrypted, service-only, deduplicated by SHA-256, and treated as untrusted input.
 - Comments and insights are read only when the corresponding runtime capability is true. Comment replies remain human-approved Phase 5 work.
 
+## Read-only Insights sync and Phase 4
+
+`/insights` の「実測値を同期」は、自分の直近25投稿を公式APIから読み取り、未測定を優先して1回につき最大8投稿の指標を `EARLY` / `24H` / `72H` / `7D` の測定窓へ保存します。
+
+- 1回の同期は最大48 metric calls、再同期は30秒間隔
+- Metaが空データを返した指標は0にせず unavailable として保存
+- DM、予約問い合わせ、予約完了は連携元がない限り `UNKNOWN`
+- Metaの指標は最大48時間遅れる場合がある
+- 保存したキャプションは untrusted external content
+- 同期は投稿、返信、DM、アカウント設定、課金を変更しない
+
+Phase 4の提案は実測値と標本数に基づく決定論的な処理です。6件未満では形式傾向を断定しません。実験案の人間承認も投稿承認とは別であり、投稿を実行しません。
+
 Official sources:
 
 - [Instagram API with Instagram Login](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-instagram-login)

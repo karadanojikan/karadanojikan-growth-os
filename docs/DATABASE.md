@@ -10,6 +10,8 @@ auth.users ─ profiles ─ workspace_members ─ workspaces
                                       │          └─ video_projects ─ video_edls ─ render_jobs
                                       ├─ media_assets ─ media_asset_rights / transcripts
                                       ├─ published_posts ─ insight_snapshots
+                                      ├─ instagram_media ─ media_insight_snapshots / insight_sync_runs
+                                      ├─ growth_reviews / growth_experiments / growth_recommendations
                                       ├─ dm_threads ─ dm_messages ─ leads
                                       └─ ai_runs / ai_usage / jobs / audit_logs
 ```

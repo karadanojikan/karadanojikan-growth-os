@@ -34,4 +34,29 @@ describe("Meta official Instagram client", () => {
     const client = new MetaInstagramClient("secret-token", "v26.0", fetcher as typeof fetch);
     await expect(client.getProfile()).rejects.toMatchObject({ status: 401, code: 190 } satisfies Partial<MetaApiError>);
   });
+
+  it("lists only owned media with a bounded page size", async () => {
+    let requested = "";
+    const fetcher = vi.fn(async (input: RequestInfo | URL) => {
+      requested = String(input);
+      return json({ data: [{ id: "media-1", media_type: "VIDEO", media_product_type: "REELS", timestamp: "2026-08-20T00:00:00+0000" }], paging: { cursors: { after: "next" } } });
+    }) as unknown as typeof fetch;
+    const client = new MetaInstagramClient("secret-token", "v26.0", fetcher);
+    const page = await client.getOwnedMedia({ limit: 100 });
+    expect(new URL(requested).pathname).toBe("/v26.0/me/media");
+    expect(new URL(requested).searchParams.get("limit")).toBe("25");
+    expect(page.data[0]?.media_product_type).toBe("REELS");
+    expect(page.paging?.cursors?.after).toBe("next");
+  });
+
+  it("reads an account snapshot without requesting write operations", async () => {
+    let method: string | undefined;
+    const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      method = init?.method;
+      return json({ id: "ig-1", followers_count: 125, follows_count: 40, media_count: 22 });
+    }) as unknown as typeof fetch;
+    const result = await new MetaInstagramClient("secret-token", "v26.0", fetcher).getAccountSnapshot("ig-1");
+    expect(method).toBeUndefined();
+    expect(result.followers_count).toBe(125);
+  });
 });

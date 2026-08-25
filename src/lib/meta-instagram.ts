@@ -16,6 +16,24 @@ const ProfileSchema = z.object({
 });
 const ProfileResponseSchema = z.union([ProfileSchema, z.object({ data: z.array(ProfileSchema).min(1) })]).transform((value) => "data" in value ? value.data[0]! : value);
 const IdSchema = z.object({ id: z.union([z.string(), z.number()]).transform(String) });
+const OwnedMediaSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform(String),
+  caption: z.string().max(10000).optional(),
+  media_type: z.string().optional(),
+  media_product_type: z.string().optional(),
+  permalink: z.string().url().optional(),
+  timestamp: z.string().optional(),
+});
+const OwnedMediaPageSchema = z.object({
+  data: z.array(OwnedMediaSchema),
+  paging: z.object({ cursors: z.object({ before: z.string().optional(), after: z.string().optional() }).optional() }).optional(),
+});
+const AccountSnapshotSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform(String),
+  followers_count: z.number().int().nonnegative().optional(),
+  follows_count: z.number().int().nonnegative().optional(),
+  media_count: z.number().int().nonnegative().optional(),
+});
 
 export class MetaApiError extends Error {
   constructor(readonly status: number, readonly code: number | undefined, message: string, readonly requestId?: string) {
@@ -102,6 +120,21 @@ export class MetaInstagramClient {
 
   async getPublishedMedia(mediaId: string) {
     return z.object({ id: z.string(), permalink: z.string().url().optional(), timestamp: z.string().optional() }).parse(await this.request(`/${encodeURIComponent(mediaId)}?fields=id,permalink,timestamp`));
+  }
+
+  async getOwnedMedia(input: { accountId?: string; after?: string; limit?: number } = {}) {
+    const limit = Math.min(Math.max(input.limit ?? 8, 1), 25);
+    const path = `/${encodeURIComponent(input.accountId ?? "me")}/media`;
+    const query = new URLSearchParams({
+      fields: "id,caption,media_type,media_product_type,permalink,timestamp",
+      limit: String(limit),
+    });
+    if (input.after) query.set("after", input.after);
+    return OwnedMediaPageSchema.parse(await this.request(`${path}?${query.toString()}`));
+  }
+
+  async getAccountSnapshot(accountId = "me") {
+    return AccountSnapshotSchema.parse(await this.request(`/${encodeURIComponent(accountId)}?fields=id,followers_count,follows_count,media_count`));
   }
 
   async getMediaDetails(mediaId: string) {
